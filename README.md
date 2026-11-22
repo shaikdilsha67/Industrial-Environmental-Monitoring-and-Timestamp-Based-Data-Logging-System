@@ -87,7 +87,7 @@ When the measured temperature exceeds the configured setpoint (e.g., `35.0 °C`)
 
 ---
 
-### 7.4 16×2 LCD Interfacing
+### 7.4 20×4 LCD Interfacing
 
 ---
 
@@ -127,7 +127,7 @@ When the measured temperature exceeds the configured setpoint (e.g., `35.0 °C`)
 
 ---
 
-### 10.1 16×2 LCD Display States
+### 10.1 20×4 LCD Display States
 
 ---
 
