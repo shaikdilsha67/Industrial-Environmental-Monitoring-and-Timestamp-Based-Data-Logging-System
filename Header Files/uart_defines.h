@@ -4,9 +4,9 @@
 
 #define baud 9600                  // Defines UART communication speed as 9600 bits per second
 #define fosc 12000000             // Defines oscillator frequency as 12 MHz
-#define cclk (fosc*5)             // Defines CPU clock: FOSC × 5 = 60 MHz
-#define pclk (cclk/4)             // Defines peripheral clock: CCLK ÷ 4 = 15 MHz
-#define divisor (pclk/(16*baud))   // Calculates UART baud-rate divisor: PCLK ÷ (16 × baud)
+#define cclk (fosc*5)             // Defines CPU clock: FOSC Ã— 5 = 60 MHz
+#define pclk (cclk/4)             // Defines peripheral clock: CCLK Ã· 4 = 15 MHz
+#define divisor (pclk/(16*baud))   // Calculates UART baud-rate divisor: PCLK Ã· (16 Ã— baud)
 
 
 #define _8bit 3;                  // Defines the value used to select 8-bit data length (semicolon is part of this macro)
