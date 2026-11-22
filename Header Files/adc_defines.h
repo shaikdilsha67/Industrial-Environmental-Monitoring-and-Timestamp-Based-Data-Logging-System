@@ -15,7 +15,7 @@
 
 // Define bit positions for ADCR (ADC Control Register)
 
-// Starting bit position of CLKDIV field in ADCR (bits 8–15)
+// Starting bit position of CLKDIV field in ADCR (bits 8â€“15)
 #define CLKDIV_BITS 8 //8-15
 
 // Bit position of PDN (Power Down) bit in ADCR
@@ -31,7 +31,7 @@
 
 // Define bit positions for ADDR (ADC Data Register)
 
-// Starting bit position of digital ADC result (bits 6–15)
+// Starting bit position of digital ADC result (bits 6â€“15)
 #define DIGITAL_DATA_BITS 6  //6-15
 
 // Bit position of DONE flag in ADDR register
