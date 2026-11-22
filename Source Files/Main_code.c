@@ -13,7 +13,7 @@
 #include "data_log.h"   // Includes temperature logging and alert functions
 #include "menu.h"       // Includes menu functions for setting RTC and temperature limit
 
-u32 temp_limit=40,r;    // temp_limit stores the temperature threshold (40°C initially); r stores the menu return value
+u32 temp_limit=40,r;    // temp_limit stores the temperature threshold (40Â°C initially); r stores the menu return value
 
 #define LOG_INTERVAL_MIN 1 // Defines the temperature logging interval in minutes
 
