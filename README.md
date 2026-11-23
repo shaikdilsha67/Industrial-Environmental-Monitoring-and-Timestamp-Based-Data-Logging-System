@@ -1,12 +1,23 @@
 
 # ⚡ Industrial Environmental Monitoring and Timestamp-Based Data Logging System
+<p align="center">
+  <img src="https://img.shields.io/badge/DOMAIN-EMBEDDED_SYSTEMS-00897B?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/CONTROLLER-LPC2148_ARM7-1565C0?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/LANGUAGE-EMBEDDED_C-6A1B9A?style=for-the-badge" />
+</p>
 
-![Domain](https://img.shields.io/badge/Domain-Embedded%20Systems-14B8A6)
-![Controller](https://img.shields.io/badge/Controller-LPC2148%20ARM7-6366F1)
-![Language](https://img.shields.io/badge/Language-Embedded%20C-22C55E)
-![Sensor](https://img.shields.io/badge/Sensor-LM35%20Temperature%20Sensor-F97316)
-![IDE](https://img.shields.io/badge/IDE-Keil%20%C2%B5Vision-F59E0B)
-![Interfaces](https://img.shields.io/badge/Interfaces-ADC%20%7C%20RTC%20%7C%20UART0%20%7C%20EINT0-0EA5E9)
+<p align="center">
+  <img src="https://img.shields.io/badge/SENSOR-LM35_TEMPERATURE-FF8F00?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/DISPLAY-20x4_LCD-00838F?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/INTERFACE-ADC%20%7C%20RTC%20%7C%20UART0-3949AB?style=for-the-badge" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/INTERRUPT-EINT0-2E7D32?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/INPUT-4x4_KEYPAD-AD1457?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/OUTPUT-BUZZER-C62828?style=for-the-badge" />
+</p>
+
 
 ---
 
