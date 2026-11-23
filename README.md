@@ -69,34 +69,99 @@ When the measured temperature exceeds the configured setpoint (e.g., `35.0 °C`)
 ### 5.2 Interactive Architecture Flowchart
 ```mermaid
 flowchart TD
-    A[LM35 Temperature Sensor] -->|10 mV/°C Analog| B[10-Bit ADC0 - P0.29]
-    B --> C[LPC2148 ARM7 Microcontroller]
-    D[On-Chip RTC] <-->|Date & Time| C
-    E[4x4 Matrix Keypad] -->|Threshold & RTC Input| C
-    F[External Interrupt EINT1 - P0.3] -->|VIC IRQ| C
-    C -->|8-Bit Parallel| G[16x2 Alphanumeric LCD]
-    C -->|9600 bps TXD0| H[UART0 + MAX232]
-    H -->|DB9 Cable| I[PC Serial Terminal]
-    C -->|GPIO P0.19| J[Industrial Buzzer]
+    A["LM35 Temperature Sensor"] -->|"10 mV/°C Analog"| B["10-Bit ADC0 - P0.28 (AD0.1)"]
+    B --> C["LPC2148 ARM7 Microcontroller"]
+    D["On-Chip RTC"] <-->|"Date & Time"| C
+    E["4x4 Matrix Keypad"] -->|"Threshold & RTC Input"| C
+    F["External Interrupt EINT0 - P0.16"] -->|"VIC IRQ"| C
+    C -->|"8-Bit Parallel Data"| G["20x4 Alphanumeric LCD"]
+    C -->|"9600 bps TXD0"| H["UART0 + MAX232"]
+    H -->|"DB9 Cable"| I["PC Serial Terminal"]
+    C -->|"GPIO P0.23"| J["Industrial Buzzer"]
+```
 ---
 
 ## 6. Hardware Showcase
-     
+  ![System Block Diagram](Docs/hardware2.jpeg)
+  ![System Block Diagram](Docs/hardware1.jpeg)
 
+- **Real-Time Temperature Monitoring:** Displays live temperature, date, and time on the 20×4 LCD using the LM35 temperature sensor and LPC2148 ADC.
+- **Mode Selection:** Provides a keypad-controlled menu with three options: `1: SET TEMP LIMIT`, `2: SET RTC`, `3: EXIT`.
+- **Temperature Setpoint:** Allows users to enter a temperature threshold through the 4×4 matrix keypad.
+- **Buzzer Alert:** Displays `BUZZER ALERT!!` on the 20×4 LCD and activates the buzzer through GPIO P0.23 when the measured temperature exceeds the configured setpoint.
+- **RTC Setup:** Provides an RTC configuration menu with `1: SET TIME`, `2: SET DATE`, `3: SET BOTH`, `4: EXIT`.
+- **Date Input:** Allows individual date, month, and year configuration through the keypad, with a back option.
+- **Time Input:** Allows individual hours, minutes, and seconds configuration through the keypad, with a back option.
+- **External Interrupt:** Uses EINT0 (P0.16) to access the RTC configuration menu.
+- **UART Communication:** Uses UART0 with a MAX232 interface and DB9 serial cable for communication with a PC terminal.
 ---
 
 ## 7. Peripheral Interfacing and Working
 
 ### 7.1 LPC2148 ARM7 Microcontroller
+The **NXP LPC2148** is a 32-bit ARM7TDMI-S microcontroller acting as the central controller of the system. Configured via the Phase-Locked Loop (PLL), it runs at a `60 MHz` CPU clock (`CCLK`) and `15 MHz` peripheral clock (`PCLK`).
 
+**Main responsibilities:**
+- Sample analog sensor voltage through `ADC1` and compute temperature in °C.
+- Read and update calendar date and time registers in the internal `RTC`.
+- Drive the `20×4 LCD` in 8-bit parallel mode.
+- Scan the `4×4 Matrix Keypad` for threshold entry and clock settings.
+- Service `EINT0` hardware interrupts through the Vectored Interrupt Controller (`VIC`).
+- Transmit periodic telemetry and alert banners over `UART0`.
+- Control the industrial buzzer on `P0.23`.
 ---
 
 ### 7.2 LM35 Temperature Sensor
+The **LM35** is a precision integrated-circuit temperature sensor whose output voltage is linearly proportional to the Celsius temperature (`10 mV/°C`).
 
+**Important characteristics:**
+- Linear analog output (`10 mV/°C` scale factor).
+- Does not require external calibration.
+- Directly compatible with the LPC2148's `0–3.3 V` analog input range.
+
+**Example output values:**
+
+| Ambient Temperature | LM35 Output Voltage |
+| :---: | :---: |
+| `25 °C` | `250 mV` |
+| `28 °C` | `280 mV` |
+| `35 °C` | `350 mV` |
+| `52.5 °C` | `525 mV` |
+
+**LM35 interfacing block diagram:**
+
+```mermaid
+flowchart LR
+    A[Ambient Heat] --> B[LM35 Sensor - 10 mV/°C]
+    B -->|Analog Voltage| C[LPC2148 ADC - P0.28]
+    C --> D[10-Bit Digital Conversion]
+    D --> E[Celsius Calculation]
+    E --> F[20x4 LCD & UART0]
+```
 ---
 
 ### 7.3 ADC Interfacing (`ADC1` – `AIN1` / `P0.28`)
+**ADC** stands for **Analog-to-Digital Converter**. Because the microcontroller processes binary numbers while the LM35 outputs an analog voltage, the LPC2148's inbuilt **10-bit ADC** translates the sensor voltage into a digital value between `0` and `1023`.
 
+- **ADC Clock:** `3 MHz` (derived from `PCLK = 15 MHz` with `CLKDIV = 4`).
+- **Conversion Formula:** `Temperature (°C) = (ADC_Result × 3.3 / 1023.0) × 100.0`.
+
+**ADC working block diagram:**
+
+```mermaid
+flowchart TD
+    A[LM35 Analog Output] --> B[P0.28 / ADC0.1 Input]
+    B --> C[Start 10-Bit ADC Conversion]
+    C --> D[Read ADDR2 Result Register]
+    D --> E[Convert Digital Count to °C]
+    E --> F[Compare Setpoint & Display]
+```
+
+**ADC pin connection:**
+
+| Signal | LPC2148 Pin |
+| :--- | :--- |
+| LM35 Analog Output | `P0.28` (`AD0.1` / `AIN1`) |
 ---
 
 ### 7.4 20×4 LCD Interfacing
