@@ -165,31 +165,159 @@ flowchart TD
 ---
 
 ### 7.4 20×4 LCD Interfacing
+A **20×4 Alphanumeric LCD** (4 rows × 20 columns) provides the local operator display for boot prompts, temperature setpoint entry feedback, interactive RTC menus, live telemetry (`DD/MM/YYYY HH:MM:SS TM:XX°`), and `BUZZER ALERT!!` warnings.
 
+### Important LCD Pins
+
+| LCD Pin | Function |
+| :--- | :--- |
+| `RS` | Register Select (`0` = Command, `1` = Data) |
+| `RW` | Read/Write (`0` = Write to LCD) |
+| `EN` | Enable strobe pulse |
+| `D0–D7` | 8-bit parallel data bus |
+
+### LCD Interfacing Block Diagram
+
+```mermaid
+flowchart LR
+    A[LPC2148 ARM7 MCU] -->|8-Bit Data Bus: P0.8-P0.15| B[20x4 Alphanumeric LCD]
+    A -->|Control Lines: RS, EN, RW| B
+    B --> C[Displays Date, Time, Temperature and Alerts]
+```
 ---
 
 ### 7.5 4×4 Matrix Keypad Interfacing
+A **4×4 matrix keypad** arranges 16 switches in 4 rows and 4 columns, allowing the microcontroller to detect any key press using 8 GPIO pins.
 
+- **Startup Role:** Enter custom temperature threshold (`*` clears/backspaces digits, `#` confirms).
+- **Menu Role:** Navigate and edit RTC fields (`1:TIME`, `2:DATE`, `3:ALL`, `4:BACK`).
+
+**Keypad working block diagram:**
+
+```mermaid
+flowchart LR
+    A[LPC2148 Port 1] -->|Row Scan: P1.16–P1.19| B[4x4 Matrix Keypad]
+    B -->|Column Read: P1.20–P1.23| A
+    A --> C[Identify Key: 0–9, *, #]
+    C --> D[Update Setpoint or RTC]
+```
+
+**Keypad pin connections:**
+
+| Keypad Signal | LPC2148 Pin |
+| :--- | :--- |
+| Row 1 (`ROW0`) | `P1.16` |
+| Row 2 (`ROW1`) | `P1.17` |
+| Row 3 (`ROW2`) | `P1.18` |
+| Row 4 (`ROW3`) | `P1.19` |
+| Column 1 (`COL0`) | `P1.20` |
+| Column 2 (`COL1`) | `P1.21` |
+| Column 3 (`COL2`) | `P1.22` |
+| Column 4 (`COL3`) | `P1.23` |
 ---
 
 ### 7.6 RTC Interfacing
+**RTC** stands for **Real-Time Clock**. The LPC2148 features a dedicated on-chip RTC block driven by a `1 Hz` prescaled clock (`PREINT` and `PREFRAC` derived from `15 MHz PCLK`) that continuously tracks seconds, minutes, hours, day of month, month, and year independently of the CPU loop.
 
+**RTC working block diagram:**
+
+```mermaid
+flowchart TD
+    A[1 Hz Prescaled Clock] --> B[LPC2148 Internal RTC Registers]
+    B --> C[Read SEC, MIN, HOUR, DOM, MONTH, YEAR]
+    C --> D[Display on 16x2 LCD & Log via UART0]
+    E[Keypad Input via EINT1] --> F[Write New Date/Time]
+    F --> B
+```
+
+**Working sequence:**
+1. The RTC increments time and calendar registers every second (`1 Hz`).
+2. The firmware reads live date and time registers on each monitoring cycle.
+3. Values are formatted onto the 16×2 LCD and included in 1-minute `UART0` reports.
+4. When `EINT1` is triggered, the user enters updated fields via the keypad, which are written back into the RTC registers.
 ---
 
 ### 7.7 External Interrupt (`EINT0` on `P0.16`)
+An **external interrupt** allows the processor to respond immediately to a hardware button press without wasting CPU cycles polling in the main loop.
 
+In this project, **External Interrupt 1 (`EINT0`)** on `P0.16` is configured as falling-edge triggered and registered in the **Vectored Interrupt Controller (`VIC`)** to launch the interactive RTC configuration menu.
+
+**External interrupt block diagram:**
+
+```mermaid
+flowchart LR
+    A[Switch Press on P0.3] -->|Falling Edge| B[EINT1 & VIC Controller]
+    B --> C[Execute EINT1_ISR]
+    C --> D[Log Interrupt on UART0]
+    D --> E[Open LCD RTC Menu]
+    E --> F[Update RTC via Keypad]
+```
+
+**Pin connection:**
+
+| Signal | LPC2148 Pin |
+| :--- | :--- |
+| External Interrupt (`EINT0`) | `P0.16` |
 ---
 
 ### 7.8 UART Communication (`UART0`)
+**UART** stands for **Universal Asynchronous Receiver Transmitter**. `UART0` streams formatted system headers, 1-minute tabular sensor logs, interrupt notifications, and threshold breach alerts to a host PC serial terminal at **9600 bps, 8N1** through a **MAX232** RS-232 level shifter and DB9 serial cable.
 
+**UART working block diagram:**
+
+```mermaid
+flowchart LR
+    A[LPC2148 UART0 - TXD0 P0.0] -->|9600 bps, 8N1| B[MAX232 Level Shifter]
+    B -->|DB9 Serial Cable| C[PC Serial Terminal Log]
+```
+
+**UART0 pin connections:**
+
+| UART Signal | LPC2148 Pin |
+| :--- | :--- |
+| `TXD0` (Transmit) | `P0.0` |
+| `RXD0` (Receive) | `P0.1` |
 ---
 
 ### 7.9 Buzzer Interfacing
+An industrial **buzzer** connected to `P0.23` provides immediate audible notification whenever ambient temperature rises above the user-configured threshold.
+
+**Working:**
+- Measured temperature is compared against the configured setpoint on every cycle.
+- If `Temperature > Setpoint`, `P0.23` is driven `HIGH` (`IOSET0`), sounding the buzzer and displaying `BUZZER ALERT!!` on the LCD.
+- Once temperature drops below the setpoint, `P0.23` is cleared `LOW` (`IOCLR0`), silencing the alarm and restoring normal display.
+
+**Buzzer working block diagram:**
+
+```mermaid
+flowchart TD
+    A[Measured Temperature] --> B{Temperature > Setpoint?}
+    B -->|Yes| C[Set P0.23 HIGH - Buzzer ON & LCD Alert]
+    B -->|No| D[Clear P0.23 LOW - Buzzer OFF]
+```
+
+**Buzzer pin connection:**
+
+| Signal | LPC2148 Pin |
+| :--- | :--- |
+| Buzzer Control | `P0.23` (Digital GPIO Output) |
 
 ---
 
 ## 8. Pin Configuration Summary
-
+| Peripheral | Signal | LPC2148 Pin(s) |
+| :--- | :--- | :--- |
+| **LM35 Sensor** | Analog Output (`AIN1`) | `P0.28` (`AD0.1`) |
+| **20×4 LCD** | Data Bus (`D0–D7`) | `P0.8 – P0.15` |
+| **20×4 LCD** | `RS` (Register Select) | `P0.18` |
+| **20×4 LCD** | `EN` (Enable) | `P0.18` |
+| **20×4 LCD** | `RW` (Read/Write) | `P0.17` |
+| **4×4 Keypad** | Rows (`ROW0–ROW3`) | `P1.16 – P1.19` |
+| **4×4 Keypad** | Columns (`COL0–COL3`) | `P1.20 – P1.23` |
+| **UART0** | `TXD0` / `RXD0` | `P0.0` / `P0.1` |
+| **External Interrupt** | `EINT0` | `P0.16` |
+| **Buzzer** | Digital Output | `P0.23` |
+| **RTC** | Internal Clock & Calendar | On-chip RTC registers |
 
 ---
 
@@ -198,14 +326,101 @@ flowchart TD
 
 ### 9.1 Step-by-Step Execution Sequence
 
+1. **System Initialization:** Configure PLL (`60 MHz` CCLK, `15 MHz` PCLK) and initialize `LCD`, `ADC0`, `RTC`, `UART0`, `4×4 Keypad`, `EINT1` (`VIC`), and buzzer GPIO (`P0.19`).
+2. **Startup Setpoint Entry:** Prompt the operator on the LCD to enter a temperature threshold via the keypad (`*` backspace, `#` confirm) and print the initial configuration banner over `UART0`.
+3. **Sensor Acquisition:** Read the analog voltage from the LM35 sensor on `P0.28` (`AD0.1`) and convert the 10-bit ADC result into degrees Celsius.
+4. **Live LCD Telemetry:** Read current date and time from the RTC and refresh the 20×4 LCD every second (`DD/MM/YYYY HH:MM:SS TM:XX°`).
+5. **Periodic UART Logging:** At every 1-minute boundary (`SEC == 00`), transmit a formatted tabular row (`DATE | TIME | TEMPERATURE`) to the PC serial terminal.
+6. **Threshold Comparison & Alerting:** Compare live temperature against the setpoint; if exceeded, drive `P0.23` `HIGH` to activate the buzzer and send `[!!] TEMPERATURE ALERT` over `UART0`.
+7. **Live RTC Interrupt Handling:** If `EINT0` (`P0.16`) is pressed at any time, pause monitoring, log `INTERUPPT RAISED....` on `UART0`, update date/time via the keypad menu, and resume normal monitoring.
+
 ---
 
 ### 9.2 Firmware Execution Flowchart
+```mermaid
+flowchart TD
+    A([Start]) --> B[Initialize PLL, LCD, ADC0, RTC, UART0, Keypad & EINT0]
+    B --> C[Enter Temperature Setpoint via 4x4 Keypad]
+    C --> D[Transmit Configuration Header via UART0]
+    D --> E{EINT0 Interrupt Flag?}
+    E -->|Yes| F[Open LCD RTC Menu & Update Date/Time/Setpoint]
+    F --> E
+    E -->|No| G[Read LM35 via ADC0 & Compute Temp °C]
+    G --> H[Read RTC Date & Time]
+    H --> I[Update 20x4 LCD Display]
+    I --> J{SEC == 00?}
+    J -->|Yes| K[Log Timestamped Data via UART0]
+    J -->|No| L{Temperature > Setpoint?}
+    K --> L
+    L -->|Yes| M[Activate Buzzer P0.23, LCD Alert & UART Alert]
+    L -->|No| N[Deactivate Buzzer P0.23]
+    M --> E
+    N --> E
+```
 
 ---
 
 ### 10.1 20×4 LCD Display States
+### 10.1 20×4 LCD Display States
 
+**Normal Temperature Monitoring Mode:**
+
+```text
+ENVIRONMENT MONITOR
+Date: 23/11/2026
+Time: 09:25:43
+Temperature: 48°C
+```
+
+**Mode Selection:**
+
+```text
+1.SET TEMP LIMIT
+2.SET RTC
+3.EXIT
+```
+
+**Temperature Setpoint Mode:**
+
+```text
+ENTER TEMP LIMIT:
+35
+```
+
+**RTC Setup Mode:**
+
+```text
+1.SET TIME
+2.SET DATE
+3.SET BOTH
+4.EXIT
+```
+
+**Date Input Mode:**
+
+```text
+1.SET DATE
+2.SET MONTH
+3.SET YEAR
+4.BACK
+```
+
+**Time Input Mode:**
+
+```text
+1.SET HOURS
+2.SET MINUTES
+3.SET SECONDS
+4.BACK
+```
+
+**Threshold Breach Alert Mode:**
+
+```text
+    BUZZER ALERT!!
+Temperature Exceeded!
+Please Check System
+```
 ---
 
 ### 10.2 Captured UART0 Serial Terminal Output
