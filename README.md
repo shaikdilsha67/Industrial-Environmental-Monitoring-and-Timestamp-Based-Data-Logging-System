@@ -309,7 +309,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | **LM35 Sensor** | Analog Output (`AIN1`) | `P0.28` (`AD0.1`) |
 | **20×4 LCD** | Data Bus (`D0–D7`) | `P0.8 – P0.15` |
-| **20×4 LCD** | `RS` (Register Select) | `P0.18` |
+| **20×4 LCD** | `RS` (Register Select) | `P0.19` |
 | **20×4 LCD** | `EN` (Enable) | `P0.18` |
 | **20×4 LCD** | `RW` (Read/Write) | `P0.17` |
 | **4×4 Keypad** | Rows (`ROW0–ROW3`) | `P1.16 – P1.19` |
@@ -424,38 +424,131 @@ Please Check System
 ---
 
 ### 10.2 Captured UART0 Serial Terminal Output
+```text
+=============================================================
+     INDUSTRIAL ENVIRONMENT MONITORING SYSTEM
+        ARM LPC2148|REAL-TIME DATA LOGGER
+=============================================================
+SYSTEM CONFIGURATION
+=============================================================
+Temperature Limit :40°C
+Monitoring Status :Active
+RTC Status        :RUNNING
+=============================================================
 
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+14/08/2312    05:43:21    28°C
+
+SYSTEM EVENT LOG
+------------------------------------------------------------
+Interrupt Raised
+05:43:46 | Setpoint Updated
+05:44:06 | Updated Setpoint is :55°C
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+14/08/2312    05:44:06    23°C
+SYSTEM EVENT LOG
+------------------------------------------------------------
+Interrupt Raised
+05:44:06 | Setpoint Updated
+05:15:22 | Updated Setpoint is :55°C
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+14/08/2312    05:15:23    27°C
+SYSTEM EVENT LOG
+------------------------------------------------------------
+Interrupt Raised
+05:15:55
+RTC Updated
+09:15:50
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+23/11/2026    09:15:51    29°C
+SYSTEM EVENT LOG
+------------------------------------------------------------
+Interrupt Raised
+09:15:51
+RTC Updated
+09:15:53
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+23/11/2026    09:16:00    29°C
+
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+23/11/2026    09:17:00    23°C
+
+REAL-TIME SENSOR DATA
+*************************************************************
+   DATA         TIME    TEMPERATURE
+*************************************************************
+23/11/2026    09:18:00    30°C
+```
 ---
 
 ## 11. Software Modules
+The firmware is written in modular **Embedded C**, separating hardware driver logic for each peripheral:
 
+| Module | Description |
+| :--- | :--- |
+| `Main_code.c` | System initialization, threshold entry, main monitoring loop, and alarm control |
+| `adc.c` / `adc.h` | `ADC0` initialization and 10-bit conversion routines for LM35 (`AIN1`) |
+| `lcd.c` / `lcd.h` | 8-bit parallel `20×4 LCD` command, string, integer, and float display drivers |
+| `kpm.c` / `kpm.h` | `4×4 Matrix Keypad` row/column scanning and debounced key decoding |
+| `rtc.c` / `rtc.h` | On-chip `RTC` prescaler setup, register read/write, and menu configuration |
+| `uart.c` / `uart.h` | `UART0` (`9600 bps, 8N1`) initialization and formatted string/number transmission |
+| `interrupt.c` / `interrupt.h` | `VIC` and `EINT0` (`P0.16`) interrupt configuration and ISR handler |
 ---
 
-## 12. Testing & Verification
 
+## 12. Applications
+
+- Industrial shop-floor and machinery thermal supervision.
+- Server room and electrical panel temperature monitoring.
+- Pharmaceutical and laboratory environment compliance logging.
+- Cold-storage and warehouse temperature threshold alerting.
+- Embedded systems and ARM7 peripheral interfacing training.
 ---
 
-## 13. Applications
-
----
-
-## 14. Limitations & Future Enhancements
+## 13. Limitations & Future Enhancements
 
 ### Current System Limitations
-
+- **Volatile Memory Only:** Setpoint configuration is stored in SRAM and resets when board power is removed; serial logs require an active PC terminal connection.
+- **No RTC Coin-Cell Backup (`VBAT`):** Disconnecting main power resets the RTC unless an external `3V` battery is attached to `VBAT`.
+- **Single-Channel Sensing:** Monitors a single analog temperature zone (`AIN2`) over a wired RS-232 serial connection.
 ---
 
 ### Future Enhancements
+ **Non-Volatile Logging (`I2C EEPROM` / `SD Card`):** Store user setpoints in EEPROM (`AT24C256`) and save offline CSV logs onto a microSD card.
+- **Wireless IoT & Cloud Telemetry:** Interface an `ESP8266`/`ESP32` Wi-Fi or `GSM` module via UART to stream data to cloud dashboards and send SMS/email alerts.
+- **Multi-Sensor Industrial Expansion:** Add humidity (`DHT22`/`HIH-4000`), gas/smoke (`MQ-2`), and multi-zone temperature sensors on unused `ADC0` channels.
+- **Automated Cooling Actuation:** Integrate an opto-isolated relay driver to automatically switch on industrial exhaust fans or cooling units during high-temperature events.
+---
+
+## 14. Conclusion
+The **Industrial Environment Monitoring System** demonstrates complete bare-metal peripheral interfacing on the **NXP LPC2148 (ARM7)** microcontroller. By integrating analog sensor acquisition (`LM35` + `ADC0`), real-time timekeeping (`RTC`), local operator interaction (`20×4 LCD` + `4×4 Keypad`), asynchronous hardware interrupts (`EINT0` + `VIC`), serial telemetry (`UART0`), and threshold-based audio alarming (`Buzzer`), the system delivers a reliable and responsive embedded monitoring solution.
 
 ---
 
-## 15. Conclusion
-
-
+## 15. Author
+- **Author:** Shaik Dilsha
+- **Project:** Industrial Environmental Monitoring and Timestamp-Based Data Logging System.
+- **Microcontroller:** NXP LPC2148 (ARM7TDMI-S)
+- **Language & IDE:** Embedded C | Keil µVision
 ---
-
-## 17. Author
-
 
 
 
