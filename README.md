@@ -1,23 +1,22 @@
 
 # ⚡ Industrial Environmental Monitoring and Timestamp-Based Data Logging System
 <p align="center">
-  <img src="https://img.shields.io/badge/DOMAIN-EMBEDDED_SYSTEMS-00897B?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/CONTROLLER-LPC2148_ARM7-1565C0?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/LANGUAGE-EMBEDDED_C-6A1B9A?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/DOMAIN-EMBEDDED_SYSTEMS-0D9488?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/CONTROLLER-LPC2148_ARM7-4F46E5?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/LANGUAGE-EMBEDDED_C-16A34A?style=for-the-badge" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/SENSOR-LM35_TEMPERATURE-FF8F00?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/DISPLAY-20x4_LCD-00838F?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/INTERFACE-ADC%20%7C%20RTC%20%7C%20UART0-3949AB?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/SENSOR-LM35_TEMPERATURE-F97316?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/DISPLAY-20x4_LCD-0891B2?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/IDE-KEIL_uVISION-F59E0B?style=for-the-badge" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/INTERRUPT-EINT0-2E7D32?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/INPUT-4x4_KEYPAD-AD1457?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/OUTPUT-BUZZER-C62828?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/INTERFACES-ADC%20%7C%20RTC%20%7C%20UART0-6366F1?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/INTERRUPT-EINT0-9333EA?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/INPUT-4x4_KEYPAD-DB2777?style=for-the-badge" />
 </p>
-
 
 ---
 
