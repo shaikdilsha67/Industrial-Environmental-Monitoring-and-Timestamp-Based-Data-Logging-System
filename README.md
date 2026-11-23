@@ -64,8 +64,29 @@ When the measured temperature exceeds the configured setpoint (e.g., `35.0 °C`)
 
 ### 5.1 System Block Diagram
 
+ ! [System Block Diagram](Docs/BlockDiagram.png)
+
 ### 5.2 Interactive Architecture Flowchart
 
+```mermaid
+flowchart TD
+    A[LM35 Temperature Sensor] -->|10 mV/°C Analog| B[10-Bit ADC0 - P0.28 AD0.1]
+
+    B --> C[LPC2148 ARM7 Microcontroller]
+
+    D[On-Chip RTC] <-->|Date & Time| C
+
+    E[4x4 Matrix Keypad] -->|Threshold & RTC Input| C
+
+    F[External Interrupt EINT0 - P0.16] -->|VIC IRQ| C
+
+    C -->|8-Bit Parallel Data| G[20x4 Alphanumeric LCD]
+
+    C -->|9600 bps TXD0| H[UART0 + MAX232]
+
+    H -->|DB9 Cable| I[PC Serial Terminal]
+
+    C -->|GPIO P0.23| J[Industrial Buzzer]
 ---
 
 ## 6. Hardware Showcase
